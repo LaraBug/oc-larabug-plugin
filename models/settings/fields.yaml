@@ -1,0 +1,26 @@
+fields:
+  key:
+    label: LB_KEY
+    span: left
+    type: text
+  header:
+    label: ''
+    span: right
+    type: partial
+    path: ~/plugins/larabug/larabug/models/settings/_header.htm
+  project_key:
+    label: LB_PROJECT_KEY
+    span: left
+    type: text
+  environments:
+    label: LB_ENVIRONMENTS
+    span: left
+    type: taglist
+    default:
+      - production
+    mode: array
+  hint:
+    label: ''
+    span: full
+    type: hint
+    path: ~/plugins/larabug/larabug/models/settings/_hint.htm

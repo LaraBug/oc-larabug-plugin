@@ -5,7 +5,7 @@ use Event;
 use Config;
 use BackendAuth;
 use System\Classes\PluginBase;
-use Illuminate\Auth\AuthManager;
+use Larabug\Larabug\Models\Settings;
 use Illuminate\Foundation\AliasLoader;
 use Larabug\Larabug\Classes\Authenticatable;
 
@@ -39,6 +39,24 @@ class Plugin extends PluginBase
      */
     public function boot()
     {
+        App::before(function () {
+            $lbKey = Settings::get('key');
+            $lbProjectKey = Settings::get('project_key');
+            $lbEnvironments = Settings::get('environments');
+
+            if ($lbKey && $lbKey !== '') {
+                Config::set('larabug.login_key', $lbKey);
+            }
+
+            if ($lbProjectKey && $lbProjectKey !== '') {
+                Config::set('larabug.project_key', $lbProjectKey);
+            }
+
+            if ($lbEnvironments && $lbEnvironments !== '') {
+                Config::set('larabug.environments', $lbEnvironments);
+            }
+        });
+
         // Setup required packages
         $this->bootPackages();
 
@@ -87,5 +105,21 @@ class Plugin extends PluginBase
                 }
             }
         }
+    }
+
+    public function registerSettings()
+    {
+        return [
+            'larabug' => [
+                'label'       => 'LaraBug',
+                'description' => 'Manage LaraBug settings.',
+                'category'    => 'system::lang.system.categories.logs',
+                'icon'        => 'icon-bug',
+                'class'       => 'Larabug\Larabug\Models\Settings',
+                'order'       => 1000,
+                'keywords'    => 'larabug exception',
+                'permissions' => []
+            ]
+        ];
     }
 }
