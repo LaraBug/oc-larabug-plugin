@@ -55,6 +55,14 @@ class Plugin extends PluginBase
             if ($lbEnvironments && $lbEnvironments !== '') {
                 Config::set('larabug.environments', $lbEnvironments);
             }
+
+            // Add to logging
+            $loggingArray = array_merge(Config::get('logging.channels'), ['larabug' => ['driver' => 'larabug']]);
+            Config::set('logging.channels', $loggingArray);
+
+            $stack = Config::get('logging.channels.stack');
+            $stack['channels'] = array_merge($stack['channels'], ['larabug']);
+            Config::set('logging.channels.stack', $stack);
         });
 
         // Setup required packages
