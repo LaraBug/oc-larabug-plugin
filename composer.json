@@ -1,5 +1,6 @@
 {
   "name": "larabug/oc-larabug-plugin",
+  "type": "october-plugin",
   "description": "Official LaraBug plugin for October CMS",
   "keywords": [
     "laravel",
@@ -18,5 +19,6 @@
     "psr-4": {
       "Larabug\\Larabug\\": ""
     }
-  }
+  },
+  "minimum-stability": "dev"
 }
