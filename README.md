@@ -14,7 +14,7 @@ composer require larabug/oc-larabug-plugin
 
 ## Usage
 
-All that is left to do is to define 2 ENV configuration variables.
+All that is left to do is to define 3 ENV configuration variables.
 
 ```
 LB_KEY=
