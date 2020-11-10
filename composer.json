@@ -1,0 +1,22 @@
+{
+  "name": "larabug/oc-larabug-plugin",
+  "description": "Official LaraBug plugin for October CMS",
+  "keywords": [
+    "laravel",
+    "octobercms",
+    "larabug",
+    "exception"
+  ],
+  "license": "MIT",
+  "require": {
+    "php": ">=7.2.0",
+    "guzzlehttp/guzzle": "~5.3|~6.0|~7.0",
+    "larabug/larabug": "2.*",
+    "october/rain": ">=1.1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Larabug\\Larabug\\": ""
+    }
+  }
+}
