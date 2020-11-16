@@ -7,15 +7,24 @@
 October CMS plugin
 
 ## Installation 
+This plugin can be installed by either installing it from the October CMS Market Place (soon) or installing it with composer.
 
+### October CMS Market Place
+Add the plugin to your project by the October CMS website or download & install it directly from the backend of your project. 
+
+### Composer
+Your October CMS project should have a `composer.json` file. If not, use the Market Place version.
 ```
 composer require larabug/oc-larabug-plugin
 ```
 
 ## Usage
+The plugin comes with an easy settings page you can access from the backend. However, if you prefer to use the `.env` variables, that's an option too.  
 
-All that is left to do is to define 3 ENV configuration variables.
+### Settings page
+Navigate to the settings page. You should see 'LaraBug' right at the bottom of the side menu.
 
+### Using .env variables
 ```
 LB_KEY=
 LB_PROJECT_KEY=

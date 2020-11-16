@@ -9,6 +9,20 @@
     "exception"
   ],
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Dennis Smink",
+      "email": "info@dennissmink.nl",
+      "homepage": "https://www.dennissmink.nl",
+      "role": "Owner"
+    },
+    {
+      "name": "Sebastiaan Kloos",
+      "email": "sebastiaan@kloos.dev",
+      "homepage": "https://kloos.dev",
+      "role": "Maintainer"
+    }
+  ],
   "require": {
     "php": ">=7.2.0",
     "guzzlehttp/guzzle": "~5.3|~6.0|~7.0",
