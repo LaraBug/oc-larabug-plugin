@@ -44,11 +44,6 @@ class Plugin extends PluginBase
             $lbProjectKey = Settings::get('project_key');
             $lbEnvironments = Settings::get('environments');
 
-            // Check if logging config file exists
-            if (!is_array(Config::get('logging.channels'))) {
-                $this->prepareLoggingConfig();
-            }
-
             if ($lbKey && $lbKey !== '') {
                 Config::set('larabug.login_key', $lbKey);
             }
@@ -61,6 +56,7 @@ class Plugin extends PluginBase
                 Config::set('larabug.environments', $lbEnvironments);
             }
 
+            // Add to logging
             $loggingArray = array_merge(Config::get('logging.channels'), ['larabug' => ['driver' => 'larabug']]);
             Config::set('logging.channels', $loggingArray);
 
@@ -117,72 +113,6 @@ class Plugin extends PluginBase
                 }
             }
         }
-    }
-
-    public function prepareLoggingConfig()
-    {
-        $loggingConfig = [
-            'default' => env('LOG_CHANNEL', 'single'),
-            'channels' => [
-                'stack' => [
-                    'driver' => 'stack',
-                    'channels' => ['daily'],
-                    'ignore_exceptions' => false,
-                ],
-
-                'single' => [
-                    'driver' => 'single',
-                    'path' => storage_path('logs/system.log'),
-                    'level' => 'debug',
-                ],
-
-                'daily' => [
-                    'driver' => 'daily',
-                    'path' => storage_path('logs/system.log'),
-                    'level' => 'debug',
-                    'days' => 14,
-                ],
-
-                'slack' => [
-                    'driver' => 'slack',
-                    'url' => env('LOG_SLACK_WEBHOOK_URL'),
-                    'username' => 'October CMS Log',
-                    'emoji' => ':boom:',
-                    'level' => 'critical',
-                ],
-
-                'papertrail' => [
-                    'driver' => 'monolog',
-                    'level' => 'debug',
-                    'handler' => \Monolog\Handler\SyslogUdpHandler::class,
-                    'handler_with' => [
-                        'host' => env('PAPERTRAIL_URL'),
-                        'port' => env('PAPERTRAIL_PORT'),
-                    ],
-                ],
-
-                'stderr' => [
-                    'driver' => 'monolog',
-                    'handler' => \Monolog\Handler\StreamHandler::class,
-                    'formatter' => env('LOG_STDERR_FORMATTER'),
-                    'with' => [
-                        'stream' => 'php://stderr',
-                    ],
-                ],
-
-                'syslog' => [
-                    'driver' => 'syslog',
-                    'level' => 'debug',
-                ],
-
-                'errorlog' => [
-                    'driver' => 'errorlog',
-                    'level' => 'debug',
-                ],
-            ],
-        ];
-
-        Config::set('logging', $loggingConfig);
     }
 
     public function registerSettings()
