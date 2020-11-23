@@ -27,7 +27,7 @@
     "php": ">=7.2.0",
     "guzzlehttp/guzzle": "~5.3|~6.0|~7.0",
     "larabug/larabug": "2.*",
-    "october/rain": ">=1.1.0"
+    "illuminate/support": "5.8"
   },
   "autoload": {
     "psr-4": {
