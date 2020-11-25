@@ -4,7 +4,10 @@ use App;
 use Event;
 use Config;
 use BackendAuth;
+use Monolog\Logger;
+use LaraBug\LaraBug;
 use System\Classes\PluginBase;
+use LaraBug\Commands\TestCommand;
 use Larabug\Larabug\Models\Settings;
 use Illuminate\Foundation\AliasLoader;
 use Larabug\Larabug\Classes\Authenticatable;
@@ -32,6 +35,23 @@ class Plugin extends PluginBase
         $this->app->bind('Illuminate\Contracts\Auth\Factory', function () {
             return BackendAuth::instance();
         });
+
+        $this->app->singleton('larabug', function ($app) {
+            return new LaraBug(new \LaraBug\Http\Client(
+                config('larabug.login_key', 'login_key'),
+                config('larabug.project_key', 'project_key')
+            ));
+        });
+
+        if ($this->app['log'] instanceof \Illuminate\Log\LogManager) {
+            $this->app['log']->extend('larabug', function ($app, $config) {
+                $handler = new \LaraBug\Logger\LaraBugHandler(
+                    $app['larabug']
+                );
+
+                return new Logger('larabug', [$handler]);
+            });
+        }
     }
 
     /**
@@ -43,6 +63,11 @@ class Plugin extends PluginBase
             $lbKey = Settings::get('key');
             $lbProjectKey = Settings::get('project_key');
             $lbEnvironments = Settings::get('environments');
+
+            // Check if logging config file exists
+            if (!is_array(Config::get('logging.channels'))) {
+                $this->prepareLoggingConfig();
+            }
 
             if ($lbKey && $lbKey !== '') {
                 Config::set('larabug.login_key', $lbKey);
@@ -67,6 +92,12 @@ class Plugin extends PluginBase
 
         // Setup required packages
         $this->bootPackages();
+
+        // Register facade
+        if (class_exists(\Illuminate\Foundation\AliasLoader::class)) {
+            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+            $loader->alias('LaraBug', 'LaraBug\Facade');
+        }
 
         Event::listen('exception.report', function ($exception) {
             if (app()->bound('larabug')) {
@@ -113,6 +144,72 @@ class Plugin extends PluginBase
                 }
             }
         }
+    }
+
+    public function prepareLoggingConfig()
+    {
+        $loggingConfig = [
+            'default' => env('LOG_CHANNEL', 'single'),
+            'channels' => [
+                'stack' => [
+                    'driver' => 'stack',
+                    'channels' => ['daily'],
+                    'ignore_exceptions' => false,
+                ],
+
+                'single' => [
+                    'driver' => 'single',
+                    'path' => storage_path('logs/system.log'),
+                    'level' => 'debug',
+                ],
+
+                'daily' => [
+                    'driver' => 'daily',
+                    'path' => storage_path('logs/system.log'),
+                    'level' => 'debug',
+                    'days' => 14,
+                ],
+
+                'slack' => [
+                    'driver' => 'slack',
+                    'url' => env('LOG_SLACK_WEBHOOK_URL'),
+                    'username' => 'October CMS Log',
+                    'emoji' => ':boom:',
+                    'level' => 'critical',
+                ],
+
+                'papertrail' => [
+                    'driver' => 'monolog',
+                    'level' => 'debug',
+                    'handler' => \Monolog\Handler\SyslogUdpHandler::class,
+                    'handler_with' => [
+                        'host' => env('PAPERTRAIL_URL'),
+                        'port' => env('PAPERTRAIL_PORT'),
+                    ],
+                ],
+
+                'stderr' => [
+                    'driver' => 'monolog',
+                    'handler' => \Monolog\Handler\StreamHandler::class,
+                    'formatter' => env('LOG_STDERR_FORMATTER'),
+                    'with' => [
+                        'stream' => 'php://stderr',
+                    ],
+                ],
+
+                'syslog' => [
+                    'driver' => 'syslog',
+                    'level' => 'debug',
+                ],
+
+                'errorlog' => [
+                    'driver' => 'errorlog',
+                    'level' => 'debug',
+                ],
+            ],
+        ];
+
+        Config::set('logging', $loggingConfig);
     }
 
     public function registerSettings()
