@@ -4,9 +4,7 @@
 
     'packages' => [
         'larabug/sentry-laravel' => [
-            'providers' => [
-                '\LaraBug\ServiceProvider',
-            ],
+            'providers' => [],
 
             'aliases' => [
                 'LaraBug'   => '\LaraBug\Facade',
