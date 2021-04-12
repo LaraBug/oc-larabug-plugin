@@ -19,6 +19,11 @@ fields:
     default:
       - production
     mode: array
+  server:
+    label: LB_SERVER
+    span: left
+    type: text
+    default: "https://www.larabug.com/api/log"
   hint:
     label: ''
     span: full

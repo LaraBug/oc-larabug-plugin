@@ -63,6 +63,7 @@ class Plugin extends PluginBase
             $lbKey = Settings::get('key');
             $lbProjectKey = Settings::get('project_key');
             $lbEnvironments = Settings::get('environments');
+            $lbServer = Settings::get('server');
 
             // Check if logging config file exists
             if (!is_array(Config::get('logging.channels'))) {
@@ -79,6 +80,10 @@ class Plugin extends PluginBase
 
             if ($lbEnvironments && $lbEnvironments !== '') {
                 Config::set('larabug.environments', $lbEnvironments);
+            }
+
+            if ($lbServer && $lbServer !== '') {
+                Config::set('larabug.server', $lbServer);
             }
 
             // Add to logging

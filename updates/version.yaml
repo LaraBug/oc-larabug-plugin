@@ -1,5 +1,6 @@
-1.0.1: 'Initial release'
-1.0.2: 'Added settings page'
-1.0.3: 'Possible fix for older October CMS'
-1.0.4: 'Reverted possible fix for older October CMS'
-1.1.0: 'Added support for older October CMS versions based on Laravel 5.5'
+"1.0.1": "Initial release"
+"1.0.2": "Added settings page"
+"1.0.3": "Possible fix for older October CMS"
+"1.0.4": "Reverted possible fix for older October CMS"
+"1.1.0": "Added support for older October CMS versions based on Laravel 5.5"
+"1.1.1": "Fixed issue for new LaraBug feature (setting server)"
