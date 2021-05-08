@@ -228,8 +228,19 @@ class Plugin extends PluginBase
                 'class'       => 'Larabug\Larabug\Models\Settings',
                 'order'       => 1000,
                 'keywords'    => 'larabug exception',
-                'permissions' => []
+                'permissions' => ['larabug.larabug.access_settings'],
             ]
+        ];
+    }
+
+    public function registerPermissions()
+    {
+        return [
+            'larabug.larabug.access_settings' => [
+                'label' => 'Access LaraBug settings',
+                'tab'   => 'LaraBug',
+                'order' => 200,
+            ],
         ];
     }
 }
