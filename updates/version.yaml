@@ -4,3 +4,4 @@
 "1.0.4": "Reverted possible fix for older October CMS"
 "1.1.0": "Added support for older October CMS versions based on Laravel 5.5"
 "1.1.1": "Fixed issue for new LaraBug feature (setting server)"
+"1.1.2": "Added permission for the LaraBug settings"
