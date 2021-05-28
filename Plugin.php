@@ -2,24 +2,27 @@
 
 use App;
 use Event;
-use Config;
 use BackendAuth;
+use LaraBug\Facade;
 use Monolog\Logger;
 use LaraBug\LaraBug;
 use System\Classes\PluginBase;
 use LaraBug\Commands\TestCommand;
+use System\Classes\PluginManager;
+use LaraBug\Logger\LaraBugHandler;
 use Larabug\Larabug\Models\Settings;
-use Illuminate\Foundation\AliasLoader;
-use Larabug\Larabug\Classes\Authenticatable;
+use RainLab\User\Classes\AuthManager;
 
 class Plugin extends PluginBase
 {
+    public $elevated = true;
+
     /**
      * Returns information about this plugin.
      *
      * @return array
      */
-    public function pluginDetails()
+    public function pluginDetails(): array
     {
         return [
             'name'        => 'larabug.larabug::lang.plugin.name',
@@ -30,194 +33,76 @@ class Plugin extends PluginBase
         ];
     }
 
-    public function register()
+    public function register(): void
     {
-        $this->app->bind('Illuminate\Contracts\Auth\Factory', function () {
-            return BackendAuth::instance();
-        });
+        $this->handleAppEnvironment();
 
-        $this->app->singleton('larabug', function ($app) {
-            return new LaraBug(new \LaraBug\Http\Client(
-                config('larabug.login_key', 'login_key'),
-                config('larabug.project_key', 'project_key')
-            ));
-        });
+        $this->handleAuthFactory();
 
-        if ($this->app['log'] instanceof \Illuminate\Log\LogManager) {
-            $this->app['log']->extend('larabug', function ($app, $config) {
-                $handler = new \LaraBug\Logger\LaraBugHandler(
-                    $app['larabug']
-                );
+        $this->registerSingleton();
 
-                return new Logger('larabug', [$handler]);
-            });
-        }
+        $this->extendLogManager();
     }
 
-    /**
-     * Runs right before the request route
-     */
-    public function boot()
+    public function boot(): void
     {
         App::before(function () {
-            $lbKey = Settings::get('key');
-            $lbProjectKey = Settings::get('project_key');
-            $lbEnvironments = Settings::get('environments');
-            $lbServer = Settings::get('server');
+            $this->setInitialConfig();
 
-            // Check if logging config file exists
-            if (!is_array(Config::get('logging.channels'))) {
+            $settings = Settings::instance();
+
+            if (!is_array(config('logging.channels'))) {
                 $this->prepareLoggingConfig();
             }
 
-            if ($lbKey && $lbKey !== '') {
-                Config::set('larabug.login_key', $lbKey);
+            // Set key
+            if (!empty($settings->key)) {
+                config()->set('larabug.login_key', $settings->key);
             }
 
-            if ($lbProjectKey && $lbProjectKey !== '') {
-                Config::set('larabug.project_key', $lbProjectKey);
+            // Set project
+            if (!empty($settings->project_key)) {
+                config()->set('larabug.project_key', $settings->project_key);
             }
 
-            if ($lbEnvironments && $lbEnvironments !== '') {
-                Config::set('larabug.environments', $lbEnvironments);
+            // Set environments
+            if (!empty($settings->environments)) {
+                config()->set('larabug.environments', $settings->environments);
             }
 
-            if ($lbServer && $lbServer !== '') {
-                Config::set('larabug.server', $lbServer);
+            // Set server
+            if (!empty($settings->server)) {
+                config()->set('larabug.server', $settings->server);
             }
 
-            // Add to logging
-            $loggingArray = array_merge(Config::get('logging.channels'), ['larabug' => ['driver' => 'larabug']]);
-            Config::set('logging.channels', $loggingArray);
+            // Set sleep
+            if (!empty($settings->sleep)) {
+                config()->set('larabug.sleep', $settings->sleep);
+            }
 
-            $stack = Config::get('logging.channels.stack');
+            // Add to logging config
+            $loggingArray = array_merge(config('logging.channels'), ['larabug' => ['driver' => 'larabug']]);
+            config()->set('logging.channels', $loggingArray);
+
+            //
+            $stack = config('logging.channels.stack');
             $stack['channels'] = array_merge($stack['channels'], ['larabug']);
-            Config::set('logging.channels.stack', $stack);
+            config()->set('logging.channels.stack', $stack);
         });
 
-        // Setup required packages
-        $this->bootPackages();
+        //
+        $this->registerFacade();
 
-        // Register facade
-        if (class_exists(\Illuminate\Foundation\AliasLoader::class)) {
-            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-            $loader->alias('LaraBug', 'LaraBug\Facade');
-        }
+        //
+        $this->registerEvents();
 
-        Event::listen('exception.report', function ($exception) {
-            if (app()->bound('larabug')) {
-                app('larabug')->handle($exception);
-            }
-        });
+        //
+        $this->registerCommands();
+
+        ray(auth());
     }
 
-    /**
-     * Boots (configures and registers) any packages found within this plugin's packages.load configuration value
-     *
-     * @see https://luketowers.ca/blog/how-to-use-laravel-packages-in-october-plugins
-     * @author Luke Towers <octobercms@luketowers.ca>
-     */
-    public function bootPackages()
-    {
-        // Get the namespace of the current plugin to use in accessing the Config of the plugin
-        $pluginNamespace = str_replace('\\', '.', strtolower(__NAMESPACE__));
-
-        // Instantiate the AliasLoader for any aliases that will be loaded
-        $aliasLoader = AliasLoader::getInstance();
-
-        // Get the packages to boot
-        $packages = Config::get($pluginNamespace . '::config.packages');
-
-        // Boot each package
-        foreach ($packages as $name => $options) {
-            // Setup the configuration for the package, pulling from this plugin's config
-            if (!empty($options['config']) && !empty($options['config_namespace'])) {
-                Config::set($options['config_namespace'], $options['config']);
-            }
-
-            // Register any Service Providers for the package
-            if (!empty($options['providers'])) {
-                foreach ($options['providers'] as $provider) {
-                    App::register($provider);
-                }
-            }
-
-            // Register any Aliases for the package
-            if (!empty($options['aliases'])) {
-                foreach ($options['aliases'] as $alias => $path) {
-                    $aliasLoader->alias($alias, $path);
-                }
-            }
-        }
-    }
-
-    public function prepareLoggingConfig()
-    {
-        $loggingConfig = [
-            'default' => env('LOG_CHANNEL', 'single'),
-            'channels' => [
-                'stack' => [
-                    'driver' => 'stack',
-                    'channels' => ['daily'],
-                    'ignore_exceptions' => false,
-                ],
-
-                'single' => [
-                    'driver' => 'single',
-                    'path' => storage_path('logs/system.log'),
-                    'level' => 'debug',
-                ],
-
-                'daily' => [
-                    'driver' => 'daily',
-                    'path' => storage_path('logs/system.log'),
-                    'level' => 'debug',
-                    'days' => 14,
-                ],
-
-                'slack' => [
-                    'driver' => 'slack',
-                    'url' => env('LOG_SLACK_WEBHOOK_URL'),
-                    'username' => 'October CMS Log',
-                    'emoji' => ':boom:',
-                    'level' => 'critical',
-                ],
-
-                'papertrail' => [
-                    'driver' => 'monolog',
-                    'level' => 'debug',
-                    'handler' => \Monolog\Handler\SyslogUdpHandler::class,
-                    'handler_with' => [
-                        'host' => env('PAPERTRAIL_URL'),
-                        'port' => env('PAPERTRAIL_PORT'),
-                    ],
-                ],
-
-                'stderr' => [
-                    'driver' => 'monolog',
-                    'handler' => \Monolog\Handler\StreamHandler::class,
-                    'formatter' => env('LOG_STDERR_FORMATTER'),
-                    'with' => [
-                        'stream' => 'php://stderr',
-                    ],
-                ],
-
-                'syslog' => [
-                    'driver' => 'syslog',
-                    'level' => 'debug',
-                ],
-
-                'errorlog' => [
-                    'driver' => 'errorlog',
-                    'level' => 'debug',
-                ],
-            ],
-        ];
-
-        Config::set('logging', $loggingConfig);
-    }
-
-    public function registerSettings()
+    public function registerSettings(): array
     {
         return [
             'larabug' => [
@@ -233,7 +118,7 @@ class Plugin extends PluginBase
         ];
     }
 
-    public function registerPermissions()
+    public function registerPermissions(): array
     {
         return [
             'larabug.larabug.access_settings' => [
@@ -242,5 +127,107 @@ class Plugin extends PluginBase
                 'order' => 200,
             ],
         ];
+    }
+
+    protected function handleAppEnvironment(): void
+    {
+        if (config('app.env')) {
+            return;
+        }
+
+        config()->set('app.env', env('APP_ENV') ?? 'local');
+    }
+
+    protected function handleAuthFactory(): void
+    {
+        if (!app()->bound('Illuminate\Contracts\Auth\Factory')) {
+            if (PluginManager::instance()->exists('RainLab.User')) {
+                $authManager = app()->runningInBackend() ? BackendAuth::class : AuthManager::class;
+            } else {
+                $authManager = BackendAuth::class;
+            }
+
+            app()->bind('Illuminate\Contracts\Auth\Factory', function () use ($authManager) {
+                return $authManager();
+            });
+        }
+    }
+
+    protected function registerSingleton(): void
+    {
+        $this->app->singleton('larabug', function ($app) {
+            return new LaraBug(new \LaraBug\Http\Client(
+                config('larabug.login_key', 'login_key'),
+                config('larabug.project_key', 'project_key')
+            ));
+        });
+    }
+
+    protected function extendLogManager(): void
+    {
+        if (!$this->app['log'] instanceof \Illuminate\Log\LogManager) {
+            return;
+        }
+
+        resolve('log')->extend('larabug', function () {
+            $handler = new LaraBugHandler(resolve('larabug'));
+
+            return new Logger('larabug', [$handler]);
+        });
+    }
+
+    protected function prepareLoggingChannels(): void
+    {
+        $loggingConfig = [
+            'default' => env('LOG_CHANNEL', 'single'),
+            'channels' => [
+                'stack' => [
+                    'driver' => 'stack',
+                    'channels' => ['daily'],
+                    'ignore_exceptions' => false,
+                ],
+                'single' => [
+                    'driver' => 'single',
+                    'path' => storage_path('logs/system.log'),
+                ],
+                'daily' => [
+                    'driver' => 'daily',
+                    'path' => storage_path('logs/system.log'),
+                    'level' => 'debug',
+                    'days' => 14,
+                ],
+            ],
+        ];
+
+        config()->set('logging', $loggingConfig);
+    }
+
+    protected function registerFacade(): void
+    {
+        if (class_exists(\Illuminate\Foundation\AliasLoader::class)) {
+            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+            $loader->alias('LaraBug', Facade::class);
+        }
+    }
+
+    protected function registerEvents(): void
+    {
+        Event::listen('exception.report', function ($exception) {
+            if (app()->bound('larabug')) {
+                app('larabug')->handle($exception);
+            }
+        });
+    }
+
+    public function registerCommands(): void
+    {
+        $this->commands([
+            TestCommand::class,
+        ]);
+    }
+
+    public function setInitialConfig(): void
+    {
+        config()->set('larabug', config('larabug.larabug::larabug-config'));
     }
 }

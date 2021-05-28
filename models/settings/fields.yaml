@@ -32,6 +32,12 @@ fields:
       action: show
       field: use_custom_server
       condition: checked
+  sleep:
+    label: larabug.larabug::lang.fields.sleep
+    comment: larabug.larabug::lang.comments.sleep
+    span: left
+    type: number
+    default: 60
   hint:
     label: ''
     span: full

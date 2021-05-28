@@ -2,124 +2,112 @@
     // If null, value will be pulled from app.debug
     'enableTestRoute' => null,
 
-    'packages' => [
-        'larabug/larabug' => [
-            'providers' => [],
+    'larabug-config' => [
+        /*
+        |--------------------------------------------------------------------------
+        | Login key
+        |--------------------------------------------------------------------------
+        |
+        | This is your authorization key which you get from your profile.
+        | Retrieve your key from https://www.larabug.com
+        |
+        */
 
-            'aliases' => [
-                'LaraBug'   => '\LaraBug\Facade',
-            ],
+        'login_key' => env('LB_KEY', 'LB_KEY'),
 
-            'config_namespace' => 'larabug',
+        /*
+        |--------------------------------------------------------------------------
+        | Project key
+        |--------------------------------------------------------------------------
+        |
+        | This is your project key which you receive when creating a project
+        | Retrieve your key from https://www.larabug.com
+        |
+        */
 
-            'config' => [
-                /*
-                |--------------------------------------------------------------------------
-                | Login key
-                |--------------------------------------------------------------------------
-                |
-                | This is your authorization key which you get from your profile.
-                | Retrieve your key from https://www.larabug.com
-                |
-                */
+        'project_key' => env('LB_PROJECT_KEY', 'LB_PROJECT_KEY'),
 
-                'login_key' => env('LB_KEY', 'LB_KEY'),
+        /*
+        |--------------------------------------------------------------------------
+        | Enviroment setting
+        |--------------------------------------------------------------------------
+        |
+        | This setting determines if the exception should be send over or not.
+        |
+        */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Project key
-                |--------------------------------------------------------------------------
-                |
-                | This is your project key which you receive when creating a project
-                | Retrieve your key from https://www.larabug.com
-                |
-                */
+        'environments' => explode(',', env('LB_ENVIRONMENTS', 'production')),
 
-                'project_key' => env('LB_PROJECT_KEY', 'LB_PROJECT_KEY'),
+        /*
+        |--------------------------------------------------------------------------
+        | Lines near exception
+        |--------------------------------------------------------------------------
+        |
+        | How many lines to show near exception line. The more you specify the bigger
+        | the displayed code will be. Max value can be 50, will be defaulted to
+        | 12 if higher than 50 automatically.
+        |
+        */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Enviroment setting
-                |--------------------------------------------------------------------------
-                |
-                | This setting determines if the exception should be send over or not.
-                |
-                */
+        'lines_count' => 12,
 
-                'environments' => explode(',', env('LB_ENVIRONMENTS', 'production')),
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent duplicates
+        |--------------------------------------------------------------------------
+        |
+        | Set the sleep time between duplicate exceptions. This value is in seconds, default: 60 seconds (1 minute)
+        |
+        */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Lines near exception
-                |--------------------------------------------------------------------------
-                |
-                | How many lines to show near exception line. The more you specify the bigger
-                | the displayed code will be. Max value can be 50, will be defaulted to
-                | 12 if higher than 50 automatically.
-                |
-                */
+        'sleep' => 0,
 
-                'lines_count' => 12,
+        /*
+        |--------------------------------------------------------------------------
+        | Skip exceptions
+        |--------------------------------------------------------------------------
+        |
+        | List of exceptions to skip sending.
+        |
+        */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Prevent duplicates
-                |--------------------------------------------------------------------------
-                |
-                | Set the sleep time between duplicate exceptions. This value is in seconds, default: 60 seconds (1 minute)
-                |
-                */
-
-                'sleep' => 60,
-
-                /*
-                |--------------------------------------------------------------------------
-                | Skip exceptions
-                |--------------------------------------------------------------------------
-                |
-                | List of exceptions to skip sending.
-                |
-                */
-
-                'except' => [
-                    'Symfony\Component\HttpKernel\Exception\NotFoundHttpException',
-                ],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Key filtering
-                |--------------------------------------------------------------------------
-                |
-                | Filter out these variables before sending them to LaraBug
-                |
-                */
-
-                'blacklist' => [
-                    'password',
-                    'authorization'
-                ],
-
-                /*
-                |--------------------------------------------------------------------------
-                | Release git hash
-                |--------------------------------------------------------------------------
-                |
-                |
-                */
-
-                // 'release' => trim(exec('git --git-dir ' . base_path('.git') . ' log --pretty="%h" -n1 HEAD'))
-
-                /*
-                |--------------------------------------------------------------------------
-                | Server setting
-                |--------------------------------------------------------------------------
-                |
-                | This setting allows you to change the server.
-                |
-                */
-
-                'server' => env('LB_SERVER', 'https://www.larabug.com/api/log'),
-            ],
+        'except' => [
+            'Symfony\Component\HttpKernel\Exception\NotFoundHttpException',
         ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Key filtering
+        |--------------------------------------------------------------------------
+        |
+        | Filter out these variables before sending them to LaraBug
+        |
+        */
+
+        'blacklist' => [
+            'password',
+            'authorization'
+        ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Release git hash
+        |--------------------------------------------------------------------------
+        |
+        |
+        */
+
+        // 'release' => trim(exec('git --git-dir ' . base_path('.git') . ' log --pretty="%h" -n1 HEAD'))
+
+        /*
+        |--------------------------------------------------------------------------
+        | Server setting
+        |--------------------------------------------------------------------------
+        |
+        | This setting allows you to change the server.
+        |
+        */
+
+        'server' => env('LB_SERVER', 'https://www.larabug.com/api/log'),
     ],
 ];
