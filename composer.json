@@ -1,5 +1,5 @@
 {
-  "name": "larabug/oc-larabug-plugin",
+  "name": "larabug/larabug-plugin",
   "type": "october-plugin",
   "description": "Official LaraBug plugin for October CMS",
   "keywords": [
@@ -18,8 +18,8 @@
     },
     {
       "name": "Sebastiaan Kloos",
-      "email": "sebastiaan@kloos.dev",
-      "homepage": "https://kloos.dev",
+      "email": "sebastiaan@codecycler.com",
+      "homepage": "https://codecycler.com",
       "role": "Maintainer"
     }
   ],
