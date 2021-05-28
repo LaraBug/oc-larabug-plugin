@@ -6,3 +6,4 @@
 "1.1.1": "Fixed issue for new LaraBug feature (setting server)"
 "1.1.2": "Added permission for the LaraBug settings"
 "1.1.3": "Refactored code and added a setting for sleep"
+"1.1.4": "Hotfix"

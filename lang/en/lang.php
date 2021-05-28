@@ -5,5 +5,9 @@
     ],
     'fields' => [
         'use_custom_server' => 'Use custom LaraBug server',
+        'sleep' => 'Set the sleep time between duplicate exceptions',
+    ],
+    'comments' => [
+        'sleep' => 'This value is in seconds, default: 60 seconds (1 minute)',
     ],
 ];

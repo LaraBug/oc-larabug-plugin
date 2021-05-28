@@ -98,8 +98,6 @@ class Plugin extends PluginBase
 
         //
         $this->registerCommands();
-
-        ray(auth());
     }
 
     public function registerSettings(): array
