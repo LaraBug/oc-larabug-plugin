@@ -19,11 +19,19 @@ fields:
     default:
       - production
     mode: array
+  use_custom_server:
+    label: larabug.larabug::lang.fields.use_custom_server
+    span: left
+    type: checkbox
   server:
     label: LB_SERVER
     span: left
     type: text
     default: "https://www.larabug.com/api/log"
+    trigger:
+      action: show
+      field: use_custom_server
+      condition: checked
   hint:
     label: ''
     span: full
