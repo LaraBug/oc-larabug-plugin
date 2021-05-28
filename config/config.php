@@ -3,7 +3,7 @@
     'enableTestRoute' => null,
 
     'packages' => [
-        'larabug/sentry-laravel' => [
+        'larabug/larabug' => [
             'providers' => [],
 
             'aliases' => [
