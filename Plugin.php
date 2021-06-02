@@ -52,7 +52,7 @@ class Plugin extends PluginBase
             $settings = Settings::instance();
 
             if (!is_array(config('logging.channels'))) {
-                $this->prepareLoggingConfig();
+                $this->prepareLoggingChannels();
             }
 
             // Set key
