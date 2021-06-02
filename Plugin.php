@@ -146,7 +146,7 @@ class Plugin extends PluginBase
             }
 
             app()->bind('Illuminate\Contracts\Auth\Factory', function () use ($authManager) {
-                return $authManager();
+                return $authManager::instance();
             });
         }
     }
