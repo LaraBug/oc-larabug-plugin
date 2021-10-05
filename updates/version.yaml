@@ -9,3 +9,4 @@
 "1.1.4": "Hotfix"
 "1.1.5": "Fixed issue with wrong function name"
 "1.1.6": "Fixed issue with authentication manager binding"
+"1.1.7": "Added missing verify_ssl config option"
