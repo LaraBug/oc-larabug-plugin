@@ -15,7 +15,7 @@ Add the plugin to your project by the October CMS website or download & install 
 ### Composer
 Your October CMS project should have a `composer.json` file. If not, use the Market Place version.
 ```
-composer require larabug/larabug-plugin
+composer require larabug/oc-larabug-plugin
 ```
 
 ## Usage
